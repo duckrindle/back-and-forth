@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<!-- this removes the favicon.ico browser warning -->
+<link rel="shortcut icon" href="#">
+
+<title>My first node server app</title>
+
+<style>
+.container {
+    width: 80%;
+    height: 80%;
+    position: absolute;    
+    margin:auto;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+    background-color: #aaa;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;  
+    position: absolute;
+    margin:auto;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
+}
+</style>
+</head>
+
+<body onload="load()">
+
+<img id="slide">
+
+<script>
+
+var slide_number = 1;
+
+document.onkeypress = function(evt) {
+
+    //------------------------------------------------------------------
+    evt = evt || window.event;
+    var charCode = evt.keyCode || evt.which;
+    var charStr = String.fromCharCode(charCode);
+    //alert(charStr);
+
+    slide_number += 1;
+    if (slide_number > 5) {
+        slide_number = 1;
+    }
+    console.log(slide_number);
+
+    //------------------------------------------------------------------
+    const req = new XMLHttpRequest();
+    req.open("POST", "/", true);
+    req.setRequestHeader("Cache-Control", "no-cache");
+    req.setRequestHeader("Pragma", "no-cache");
+    req.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
+    req.responseType = "text";
+
+    var text = random_text(100);
+    //console.log("random", text);
+        
+    req.onload = (event) => {
+        //console.log('uploaded');
+
+        if (req.readyState === req.DONE) {
+            if (req.status === 200) {
+                console.log("received", req.responseText);
+                if (req.responseText === text) {
+                    console.log("sames");
+                }
+                else {
+                    console.log("differents");
+                }
+            }
+        }
+    };
+
+    req.send(text);
+    console.log("sent", text);
+};
+
+function random_text(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
+
+//var myVar = setInterval(load, 1000);
+function load() {
+}
+
+</script>
+
+</body>
+</html>
