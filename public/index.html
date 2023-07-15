@@ -53,8 +53,8 @@ setInterval(function() {
 document.addEventListener("keydown", function(event) {
     if (event.key == "ArrowUp") {
         desired += 1000;
-        if (desired > 10000)
-            desired = 10000;
+        if (desired > 500000)
+            desired = 500000;
         document.getElementById("desired").innerHTML = desired;
 
     } else if (event.key == "ArrowDown"){
