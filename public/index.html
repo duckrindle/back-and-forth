@@ -4,56 +4,83 @@
 <head>
 <!-- this removes the favicon.ico browser warning -->
 <link rel="shortcut icon" href="#">
-
 <title>My first node server app</title>
-
 <style>
-.container {
-    width: 80%;
-    height: 80%;
-    position: absolute;    
-    margin:auto;
-    top:0;
-    bottom:0;
-    left:0;
-    right:0;
-    background-color: #aaa;
+body {
+    font-family: 'Calibri', 'monospace';
+    font-size: 64px;
+    font-weight: normal;
+    text-align: left;
 }
 
-img {
-    max-width: 100%;
-    max-height: 100%;  
-    position: absolute;
-    margin:auto;
-    top:0;
-    bottom:0;
-    left:0;
-    right:0;
+form {
+    position: relative;
+    bottom: 10;
+    right: 10;
+    left: 10;
+}
+
+table{
+    margin-left: 100px;
 }
 </style>
 </head>
 
-<body onload="load()">
+<body>
 
-<img id="slide">
+<p>Uploaded bytes/second</p>
+<table>
+  <tr>
+    <td>Desired :</td><th id="desired"></th>
+  </tr>
+  <tr>
+    <td>Obtained:</td><th id="obtained"></th>
+  </tr>
+</table>
 
 <script>
 
-var slide_number = 1;
+var desired = 1000;
+var obtained = 0;
 
-document.onkeypress = function(evt) {
+document.getElementById("desired").innerHTML = desired;
+document.getElementById("obtained").innerHTML = obtained;
 
-    //------------------------------------------------------------------
-    evt = evt || window.event;
-    var charCode = evt.keyCode || evt.which;
-    var charStr = String.fromCharCode(charCode);
-    //alert(charStr);
+setInterval(function() {
+  document.getElementById("obtained").innerHTML = obtained;
+}, 500);
 
-    slide_number += 1;
-    if (slide_number > 5) {
-        slide_number = 1;
+document.addEventListener("keydown", function(event) {
+    if (event.key == "ArrowUp") {
+        desired += 1000;
+        if (desired > 10000)
+            desired = 10000;
+        document.getElementById("desired").innerHTML = desired;
+
+    } else if (event.key == "ArrowDown"){
+        desired -= 1000;
+        if (desired < 1000)
+            desired = 1000;
+        document.getElementById("desired").innerHTML = desired;
     }
-    console.log(slide_number);
+});
+
+var text_size = 0;
+var done = true;
+var count = 0;
+
+setInterval(function send_post_and_get_rate() {
+    //------------------------------------------------------------------
+    // avoid flooding the server with requests if each one has not its response 
+    // but if no response within 10 sec then we enable requests again
+    count += 1;
+    if (done == false && count < 100) {
+        return;
+    }
+    else {
+        done = true;
+        count = 0;
+    }
 
     //------------------------------------------------------------------
     const req = new XMLHttpRequest();
@@ -63,28 +90,21 @@ document.onkeypress = function(evt) {
     req.setRequestHeader("If-Modified-Since", "Sat, 1 Jan 2000 00:00:00 GMT");
     req.responseType = "text";
 
-    var text = random_text(100);
+    text_size = desired / 10;
+    var text = random_text(text_size);
     //console.log("random", text);
-        
+    req.send(text);
+    //console.log("sent", text);
+
     req.onload = (event) => {
         //console.log('uploaded');
-
-        if (req.readyState === req.DONE) {
-            if (req.status === 200) {
-                console.log("received", req.responseText);
-                if (req.responseText === text) {
-                    console.log("sames");
-                }
-                else {
-                    console.log("differents");
-                }
-            }
+        if (req.readyState === req.DONE && req.status === 200) {
+            obtained = req.responseText;
+            //console.log("received", req.responseText);
+            done = true;
         }
     };
-
-    req.send(text);
-    console.log("sent", text);
-};
+}, 100);
 
 function random_text(length) {
     let result = '';
@@ -96,10 +116,6 @@ function random_text(length) {
       counter += 1;
     }
     return result;
-}
-
-//var myVar = setInterval(load, 1000);
-function load() {
 }
 
 </script>
