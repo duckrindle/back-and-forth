@@ -36,6 +36,6 @@ app.post("/", (req, res) => {
     });
 });
 
-app.listen(9000, "localhost", () => {
-  console.log("Server is running on port 9000");
+app.listen(10000, "localhost", () => {
+  console.log("Server is running on port 10000");
 });
